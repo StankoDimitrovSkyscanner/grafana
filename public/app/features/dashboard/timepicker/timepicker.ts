@@ -32,7 +32,6 @@ export class TimePickerCtrl {
   /** @ngInject */
   constructor(private $scope, private $rootScope, private timeSrv) {
     $scope.ctrl = this;
-    this.minAutoRefreshDuration = this.getMinAutoRefreshDuration();
 
     $rootScope.onAppEvent('shift-time-forward', () => this.move(1), $scope);
     $rootScope.onAppEvent('shift-time-backward', () => this.move(-1), $scope);
@@ -46,8 +45,12 @@ export class TimePickerCtrl {
     this.panel = this.dashboard.timepicker;
 
     _.defaults(this.panel, TimePickerCtrl.defaults);
+    this.minAutoRefreshDuration = this.getMinAutoRefreshDuration();
     if (this.minAutoRefreshDuration) {
       this.filterAutoRefreshIntervals(this.minAutoRefreshDuration);
+      if (this.dashboard.refersh) {
+        this.dashboard.refresh = this.limitDashboardRefresh(this.minAutoRefreshDuration);
+      }
     }
 
     this.firstDayOfWeek = moment.localeData().firstDayOfWeek();
@@ -189,6 +192,9 @@ export class TimePickerCtrl {
     this.getDataSources().forEach(ds => dataSources.push(ds));
 
     dataSources = _.filter(dataSources, function(ds){
+      if (!config.datasources[ds]) {
+        return false;
+      }
       let jsonData = config.datasources[ds].jsonData;
       return (jsonData && jsonData.minAutoRefreshInterval);
     });
@@ -210,6 +216,17 @@ export class TimePickerCtrl {
       let dur = moment.duration(parseInt(m[1]), m[2]);
       return dur.asSeconds() >= minAutoRefreshDuration.asSeconds();
     });
+  }
+
+  getSecondsForInterval(interval) {
+    let m = interval.match(TimePickerCtrl.durationSplitRegexp);
+    let dur = moment.duration(parseInt(m[1]), m[2]);
+    return dur.asSeconds();
+  }
+
+  limitDashboardRefresh(minAutoRefreshDuration) {
+      let refresh_seconds = this.getSecondsForInterval(this.dashboard.refresh);
+      return (refresh_seconds >= minAutoRefreshDuration.asSeconds())? this.dashboard.refresh : null;
   }
 }
 
