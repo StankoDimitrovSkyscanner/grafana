@@ -1,0 +1,49 @@
+---
+build:
+  image: centos:6.6
+  commands:
+  - yum install -y initscripts curl tar gcc libc6-dev git gcc-c++ openssl-devel
+  - yum install -y g++ make automake autoconf curl-devel zlib-devel httpd-devel apr-devel apr-util-devel sqlite-devel
+  - yum install -y wget yum-utils bzip2 bzip2-devel
+  - yum install -y fontconfig freetype freetype-devel fontconfig-devel libstdc++
+  - yum install -y rpm-build patch readline readline-devel libtool bison lzma
+
+# Install RUBY 1.9.3
+# install necessary utilities
+  - yum install -y which tar
+  - gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+  - curl -sSl https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer | bash -s stable
+  - source /etc/profile.d/rvm.sh
+  - /bin/bash -l -c "rvm requirements"
+  - /bin/bash -l -c "rvm install 2.1.9"
+  - /bin/bash -l -c "rvm use 2.1.9 --default"
+
+# install nodejs
+  - curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+  - yum install -y nodejs --nogpgcheck
+
+  - export GOLANG_VERSION=1.8
+
+  - wget https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
+  - tar -C /usr/local -xzf go1.8.linux-amd64.tar.gz
+
+  - export PATH=/usr/local/go/bin:$PATH
+  - mkdir -p /go/src /go/bin && chmod -R 777 /go
+  - export PATH=/go/bin:$PATH
+
+  - mkdir -p $GOPATH/src/github.com/grafana
+  - ln -s $PWD $GOPATH/src/github.com/grafana/grafana
+  - ls $GOPATH/src/github.com/grafana/grafana
+  - cd $GOPATH/src/github.com/grafana/grafana
+
+  - go run build.go build
+  - npm install -g yarn
+  - yarn install
+
+  - source /etc/profile.d/rvm.sh
+  - /bin/bash -l -c "rvm use 2.1.9 --default"
+  - /bin/bash -l -c "gem install fpm -v 1.4"
+  - /bin/bash -l -c "go run build.go package latest"
+
+  #    when:
+  #      event: push
