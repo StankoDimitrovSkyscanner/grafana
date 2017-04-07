@@ -35,7 +35,9 @@ export class TimePickerCtrl {
 
     $rootScope.onAppEvent('shift-time-forward', () => this.move(1), $scope);
     $rootScope.onAppEvent('shift-time-backward', () => this.move(-1), $scope);
-    $rootScope.onAppEvent('refresh', () => this.init(), $scope);
+    $rootScope.onAppEvent('refresh', () => this.init());
+    $rootScope.onAppEvent('panel-tear-down', () => this.init());
+    $rootScope.onAppEvent('panel-initialized', () => this.init());
     $rootScope.onAppEvent('dash-editor-hidden', () => this.isOpen = false, $scope);
 
     this.init();
@@ -48,7 +50,7 @@ export class TimePickerCtrl {
     this.minAutoRefreshDuration = this.getMinAutoRefreshDuration();
     if (this.minAutoRefreshDuration) {
       this.filterAutoRefreshIntervals(this.minAutoRefreshDuration);
-      if (this.dashboard.refersh) {
+      if (this.dashboard.refresh) {
         this.dashboard.refresh = this.limitDashboardRefresh(this.minAutoRefreshDuration);
       }
     }
@@ -211,7 +213,7 @@ export class TimePickerCtrl {
   }
 
   filterAutoRefreshIntervals(minAutoRefreshDuration) {
-    this.panel.refresh_intervals = _.filter(this.panel.refresh_intervals, function(interval){
+    this.panel.refresh_intervals = _.filter(TimePickerCtrl.defaults.refresh_intervals, function(interval){
       let m = interval.match(TimePickerCtrl.durationSplitRegexp);
       let dur = moment.duration(parseInt(m[1]), m[2]);
       return dur.asSeconds() >= minAutoRefreshDuration.asSeconds();
