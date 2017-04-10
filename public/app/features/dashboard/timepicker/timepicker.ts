@@ -228,7 +228,12 @@ export class TimePickerCtrl {
 
   limitDashboardRefresh(minAutoRefreshDuration) {
       let refresh_seconds = this.getSecondsForInterval(this.dashboard.refresh);
-      return (refresh_seconds >= minAutoRefreshDuration.asSeconds())? this.dashboard.refresh : null;
+      if (refresh_seconds >= minAutoRefreshDuration.asSeconds()) {
+        return this.dashboard.refresh;
+      } else {
+        this.$rootScope.appEvent('alert-warning', ['Enforced refresh interval limit.']);
+        return null;
+      }
   }
 }
 
