@@ -36,6 +36,8 @@ build:
   - ls $GOPATH/src/github.com/grafana/grafana
   - cd $GOPATH/src/github.com/grafana/grafana
 
+  - npm install --save-dev grunt-sass
+
   - go run build.go build
   - npm install -g yarn
   - yarn install
@@ -45,5 +47,15 @@ build:
   - /bin/bash -l -c "gem install fpm -v 1.4"
   - /bin/bash -l -c "go run build.go package latest"
 
-  #    when:
-  #      event: push
+# publish:
+#   s3:
+#     region: "eu-west-1"
+#     bucket: "skyscanner-prod-skymetrics-deploymentsupport"
+#     access_key: $$ACCESS_KEY
+#     secret_key: $$SECRET_KEY
+#     source: ./dist/grafana-latest-1.x86_64.rpm
+#     target: "/artifacts/"
+#     recursive: false
+#     when:
+#       branch: v4.2.0
+#       event: push
