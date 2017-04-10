@@ -215,22 +215,20 @@ export class TimePickerCtrl {
     return _.max(minAutoRefreshDurations, function(duration){ return duration.asSeconds(); });
   }
 
-  filterAutoRefreshIntervals(minAutoRefreshDuration) {
-    this.panel.refresh_intervals = _.filter(TimePickerCtrl.defaults.refresh_intervals, function(interval){
-      let m = interval.match(TimePickerCtrl.durationSplitRegexp);
-      let dur = moment.duration(parseInt(m[1]), m[2]);
-      return dur.asSeconds() >= minAutoRefreshDuration.asSeconds();
-    });
-  }
-
-  getSecondsForInterval(interval) {
+  static getSecondsForInterval(interval) {
     let m = interval.match(TimePickerCtrl.durationSplitRegexp);
     let dur = moment.duration(parseInt(m[1]), m[2]);
     return dur.asSeconds();
   }
 
+  filterAutoRefreshIntervals(minAutoRefreshDuration) {
+    this.panel.refresh_intervals = _.filter(TimePickerCtrl.defaults.refresh_intervals, function(interval){
+      return TimePickerCtrl.getSecondsForInterval(interval) >= minAutoRefreshDuration.asSeconds();
+    });
+  }
+
   limitDashboardRefresh(minAutoRefreshDuration) {
-      let refresh_seconds = this.getSecondsForInterval(this.dashboard.refresh);
+      let refresh_seconds = TimePickerCtrl.getSecondsForInterval(this.dashboard.refresh);
       if (refresh_seconds >= minAutoRefreshDuration.asSeconds()) {
         return this.dashboard.refresh;
       } else {
