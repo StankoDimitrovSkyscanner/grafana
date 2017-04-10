@@ -53,6 +53,9 @@ export class TimePickerCtrl {
       if (this.dashboard.refresh) {
         this.dashboard.refresh = this.limitDashboardRefresh(this.minAutoRefreshDuration);
       }
+    } else {
+      // reset refresh intervals
+      this.panel.refresh_intervals = TimePickerCtrl.defaults.refresh_intervals.slice();
     }
 
     this.firstDayOfWeek = moment.localeData().firstDayOfWeek();
